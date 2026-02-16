@@ -18,7 +18,7 @@ def verification_bepc_complete():
     # Charger vos données
     print("🔄 Chargement des données...")
     try:
-        df = pd.read_excel("C:/Users/LeghoJoshua/Documents/ABS_GENERAL.xls")
+        df = pd.read_excel("ABS_GENERAL.xlsx")
         print(f"✅ Données chargées: {len(df)} lignes")
         print(f"📋 Colonnes: {list(df.columns)}")
         
@@ -426,4 +426,5 @@ if __name__ == "__main__":
     print("-" * 60)
     
     verification_bepc_complete()
+
     print("\n✅ VÉRIFICATION COMPLÈTE TERMINÉE!")
