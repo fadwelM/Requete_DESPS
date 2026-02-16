@@ -2,3 +2,11 @@ streamlit
 pandas
 openpyxl
 selenium
+streamlit
+pandas
+selenium
+openpyxl
+xlrd
+numpy
+tkinter
+matplotlib
