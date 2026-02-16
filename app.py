@@ -1,4 +1,4 @@
-import streamlit as st
+ import streamlit as st
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -12,9 +12,9 @@ import time
 import random
 import os
 
-st.set_page_config(page_title="Vérification Inscription", page_icon="🎓", layout="wide")
+st.set_page_config(page_title="Vérification des statuts à l'inscription AFFECTÉ(E) - NON AFFECTÉ(E)", page_icon="🎓", layout="wide")
 
-st.title("🎓 Système de Vérification Inscription")
+st.title("🎓 Système de Vérification des statuts à l'inscription AFFECTÉ(E) - NON AFFECTÉ(E) 2025-2026")
 st.markdown("---")
 
 
@@ -195,6 +195,7 @@ if st.button("🚀 Lancer la vérification"):
     finally:
         if driver:
             driver.quit()
+
 
 
 
