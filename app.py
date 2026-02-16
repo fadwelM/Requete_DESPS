@@ -41,11 +41,6 @@ if "MATRICULE" not in df.columns:
     st.stop()
 
 # ==========================
-# TITRE
-# ==========================
-st.title("🎓 Système de Vérification des statuts à l'inscription AFFECTÉ(E) - NON AFFECTÉ(E) 2025-2026")
-
-# ==========================
 # STYLE GLOBAL
 # ==========================
 st.markdown("""
@@ -223,5 +218,6 @@ if st.button("🚀 Lancer la vérification"):
     finally:
         if driver:
             driver.quit()
+
 
 
