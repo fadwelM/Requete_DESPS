@@ -50,8 +50,9 @@ st.markdown("""
         font-size: 42px;
         font-weight: 800;
         color: white;
-        margin-top: 10px;
-        margin-bottom: 20px;
+        top: 5;
+        margin-top: 5px;
+        margin-bottom: 50px;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         letter-spacing: 1px;
         padding: 10px;
@@ -114,6 +115,9 @@ st.markdown("""
         border-radius: 10px;
         overflow: hidden;
         margin: 10px 0;
+        top : 13px;
+        margin-top : 0 auto;
+        margin-bottom : 0 auto;
         background-color: #0F1F35;
     }
     
@@ -124,6 +128,9 @@ st.markdown("""
         border-radius: 10px;
         border: 1px solid #1E3A5F;
         margin: 10px 0;
+        top : 13px;
+        margin-top : 0 auto;
+        margin-bottom : 0 auto;
     }
     
     /* Barre de progression */
@@ -180,7 +187,10 @@ st.markdown("""
         color: #B0C4DE;
         font-size: 16px;
         font-weight: 600;
-        margin-bottom: 5px;
+        margin-bottom: 25px;
+        margin-top: 10px;
+        top : 10px;
+            
     }
     
     /* Cache les petits éléments inutiles */
@@ -233,7 +243,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown(f"<div class='info-text'>✅ {len(df)} matricules chargés depuis {fichier_trouve}</div>", unsafe_allow_html=True)
+st.markdown(f"<div class='info-text'>✅ {len(df)} matricules chargés depuis table la scolaire à traiter</div>", unsafe_allow_html=True)
 
 # ==========================
 # SÉLECTION DE L'INTERVALLE
@@ -280,7 +290,7 @@ st.markdown("---")
 # ==========================
 # BOUTON LANCEMENT
 # ==========================
-if st.button("🚀 LANCER LA VÉRIFICATION AUTOMATIQUE", use_container_width=True):
+if st.button("✅ LANCER LA RECHERCHE DES INFORMATION SUR LA FICHE D'INSCRIPTION", use_container_width=True):
     
     # Sélection des matricules selon l'intervalle choisi
     matricules = df.iloc[start_row-1:end_row]["MATRICULE"].astype(str).tolist()
@@ -397,7 +407,7 @@ if st.button("🚀 LANCER LA VÉRIFICATION AUTOMATIQUE", use_container_width=Tru
             
             # 📊 Mise à jour stats
             stat_affecte.metric("✅ AFFECTÉS", count_affecte)
-            stat_non_affecte.metric("❌ NON AFFECTÉS", count_non_affecte)
+            stat_non_affecte.metric("💻 NON AFFECTÉS", count_non_affecte)
             stat_introuvable.metric("❓ INTROUVABLES", count_introuvable)
             stat_erreur.metric("⚠️ ERREURS", count_erreur)
             
@@ -422,7 +432,7 @@ if st.button("🚀 LANCER LA VÉRIFICATION AUTOMATIQUE", use_container_width=Tru
             st.markdown(f"""
             ### 📊 RÉSUMÉ FINAL
             - ✅ Affectés : {count_affecte} ({count_affecte/total*100:.1f}%)
-            - ❌ Non affectés : {count_non_affecte} ({count_non_affecte/total*100:.1f}%)
+            - 💻 Non affectés : {count_non_affecte} ({count_non_affecte/total*100:.1f}%)
             - ❓ Introuvables : {count_introuvable} ({count_introuvable/total*100:.1f}%)
             - ⚠️ Erreurs : {count_erreur} ({count_erreur/total*100:.1f}%)
             """)
@@ -447,10 +457,21 @@ else:
     <div style="text-align: center; padding: 50px; background-color: #0F1F35; border-radius: 10px; border: 1px solid #1E3A5F;">
         <h2 style="color: white;">👆 CLIQUEZ SUR LE BOUTON POUR COMMENCER</h2>
         <p style="color: #B0C4DE;">La vérification commencera à la ligne <strong>{}</strong> jusqu'à la ligne <strong>{}</strong></p>
+        <p style="color: #B0C4DE;">Soit <strong>{}</strong> matricule(s) à traiter sur <strong>{}</strong> au total</p>
         <p style="color: #B0C4DE; font-size: 14px;">Les captures d'écran apparaîtront dans la partie gauche (2/3 de l'écran)<br>
         Les statistiques et la progression seront affichées à droite (1/3 de l'écran)</p>
     </div>
-    """.format(start_row, end_row), unsafe_allow_html=True)
+    """.format(start_row, end_row, end_row - start_row + 1, len(df)), unsafe_allow_html=True)
+
+
+
+
+
+
+
+
+
+
 
 
 
