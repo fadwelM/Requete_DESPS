@@ -114,12 +114,16 @@ if "MATRICULE" not in df.columns:
 st.success(f"✅ {len(df)} lignes chargées automatiquement")
 
 # Bouton lancement
+# Bouton lancement
 if st.button("🚀 Lancer la vérification"):
 
     matricules = df["MATRICULE"].astype(str).tolist()[:limite]
 
-    progress = st.progress(0)
-    status = st.empty()
+    # Layout 2/3 - 1/3
+    col_page, col_progress = st.columns([2, 1])
+
+    page_container = col_page.empty()
+    progress_container = col_progress.container()
 
     resultats = []
     driver = None
@@ -127,31 +131,61 @@ if st.button("🚀 Lancer la vérification"):
     try:
         driver = get_chrome_driver()
 
+        progress_bar = progress_container.progress(0)
+        status_text = progress_container.empty()
+
         for i, m in enumerate(matricules):
 
-            status.text(f"Traitement {i+1}/{len(matricules)} : {m}")
+            status_text.markdown(f"### 🔄 Traitement {i+1}/{len(matricules)}")
+            status_text.write(f"Matricule : **{m}**")
 
-            resultat = verifier_matricule(driver, m)
-            resultats.append(resultat)
+            driver.get("https://agfne.sigfne.net/vas/interface-edition-documents-sigfne/")
 
-            progress.progress((i + 1) / len(matricules))
+            wait = WebDriverWait(driver, 15)
+            champ = wait.until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='text']"))
+            )
+
+            champ.clear()
+            champ.send_keys(str(m))
+            champ.send_keys(Keys.RETURN)
+
+            time.sleep(3)
+
+            # 🔥 Affichage LIVE de la page dans les 2/3 écran
+            page_html = driver.page_source
+            page_container.components.v1.html(
+                page_html,
+                height=800,
+                scrolling=True
+            )
+
+            page_text = page_html.lower()
+
+            if "non affecte" in page_text:
+                statut = "NON_AFFECTE"
+            elif "affecte" in page_text:
+                statut = "AFFECTE"
+            elif "introuvable" in page_text:
+                statut = "INTROUVABLE"
+            else:
+                statut = "INDETERMINE"
+
+            resultats.append({
+                "matricule": m,
+                "statut": statut,
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            })
+
+            progress_bar.progress((i + 1) / len(matricules))
 
             if i < len(matricules) - 1:
                 time.sleep(random.uniform(2, 4))
 
-        st.success("✅ Vérification terminée")
+        progress_container.success("✅ Vérification terminée")
 
         df_resultats = pd.DataFrame(resultats)
         st.dataframe(df_resultats, use_container_width=True)
-
-        csv = df_resultats.to_csv(index=False)
-
-        st.download_button(
-            "📥 Télécharger CSV",
-            csv,
-            file_name=f"resultats_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-            mime="text/csv"
-        )
 
     except Exception as e:
         st.error(f"Erreur : {e}")
@@ -159,4 +193,5 @@ if st.button("🚀 Lancer la vérification"):
     finally:
         if driver:
             driver.quit()
+
 
