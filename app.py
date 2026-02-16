@@ -10,6 +10,7 @@ from selenium.webdriver.common.keys import Keys
 from datetime import datetime
 import time
 import random
+import os
 
 st.set_page_config(page_title="Vérification Inscription", page_icon="🎓", layout="wide")
 
@@ -22,21 +23,16 @@ st.markdown("---")
 # ==========================
 def get_chrome_driver():
     chrome_options = Options()
-
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
-    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    chrome_options.add_experimental_option("useAutomationExtension", False)
 
     service = Service("/usr/local/bin/chromedriver")
 
     driver = webdriver.Chrome(service=service, options=chrome_options)
     driver.set_page_load_timeout(30)
-
     return driver
 
 
@@ -47,10 +43,8 @@ def verifier_matricule(driver, matricule):
 
     try:
         driver.get("https://agfne.sigfne.net/vas/interface-edition-documents-sigfne/")
-
         wait = WebDriverWait(driver, 15)
 
-        # Attendre le champ matricule
         champ = wait.until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='text']"))
         )
@@ -59,105 +53,110 @@ def verifier_matricule(driver, matricule):
         champ.send_keys(str(matricule))
         champ.send_keys(Keys.RETURN)
 
-        # Attendre que la page affiche un résultat
-        wait.until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
-
         time.sleep(3)
 
         page_text = driver.page_source.lower()
 
-        # Analyse statut
         if "non affecte" in page_text:
             statut = "NON_AFFECTE"
-            details = "Candidat non affecté"
         elif "affecte" in page_text:
             statut = "AFFECTE"
-            details = "Candidat affecté"
         elif "introuvable" in page_text or "non trouvé" in page_text:
             statut = "INTROUVABLE"
-            details = "Matricule non trouvé"
         else:
             statut = "INDETERMINE"
-            details = "Résultat non identifié"
 
         return {
             "statut": statut,
-            "niveau": "NON_DEFINI",
-            "details": details,
+            "matricule": matricule,
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
 
     except Exception as e:
         return {
             "statut": "ERREUR",
-            "niveau": "NON_DEFINI",
-            "details": str(e)[:100],
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "matricule": matricule,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "erreur": str(e)[:100]
         }
 
 
 # ==========================
 # INTERFACE STREAMLIT
 # ==========================
-df = pd.read_excel("ABS_GENERAL.xlsx", engine="openpyxl")
 
-    if "MATRICULE" not in df.columns:
-        st.error("❌ Colonne 'MATRICULE' introuvable.")
-    else:
+# Sélecteur du nombre de lignes à traiter
+limite = st.number_input(
+    "Nombre de matricules à traiter",
+    min_value=1,
+    max_value=2000,
+    value=10
+)
 
-        st.success(f"✅ {len(df)} lignes chargées")
+# Charger automatiquement le fichier du repository
+try:
+    if not os.path.exists("ABS_GENERAL.xlsx"):
+        st.error("❌ Le fichier ABS_GENERAL.xlsx est introuvable dans le repository.")
+        st.stop()
 
-        if st.button("🚀 Lancer la vérification"):
+    df = pd.read_excel("ABS_GENERAL.xlsx", engine="openpyxl")
 
-            matricules = df["MATRICULE"].astype(str).tolist()[:limite]
+except Exception as e:
+    st.error(f"Erreur chargement fichier : {e}")
+    st.stop()
 
-            progress = st.progress(0)
-            status = st.empty()
 
-            resultats = []
+# Vérifier colonne
+if "MATRICULE" not in df.columns:
+    st.error("❌ Colonne 'MATRICULE' introuvable.")
+    st.stop()
 
-            driver = None
+st.success(f"✅ {len(df)} lignes chargées automatiquement")
 
-            try:
-                driver = get_chrome_driver()
+# Bouton lancement
+if st.button("🚀 Lancer la vérification"):
 
-                for i, m in enumerate(matricules):
+    matricules = df["MATRICULE"].astype(str).tolist()[:limite]
 
-                    status.text(f"Traitement {i+1}/{len(matricules)} : {m}")
+    progress = st.progress(0)
+    status = st.empty()
 
-                    resultat = verifier_matricule(driver, m)
-                    resultat["matricule"] = m
-                    resultats.append(resultat)
+    resultats = []
+    driver = None
 
-                    progress.progress((i + 1) / len(matricules))
+    try:
+        driver = get_chrome_driver()
 
-                    if i < len(matricules) - 1:
-                        time.sleep(random.uniform(2, 4))
+        for i, m in enumerate(matricules):
 
-                st.success("✅ Terminé")
+            status.text(f"Traitement {i+1}/{len(matricules)} : {m}")
 
-                df_resultats = pd.DataFrame(resultats)
+            resultat = verifier_matricule(driver, m)
+            resultats.append(resultat)
 
-                st.dataframe(df_resultats, use_container_width=True)
+            progress.progress((i + 1) / len(matricules))
 
-                csv = df_resultats.to_csv(index=False)
+            if i < len(matricules) - 1:
+                time.sleep(random.uniform(2, 4))
 
-                st.download_button(
-                    "📥 Télécharger CSV",
-                    csv,
-                    file_name=f"resultats_bepc_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                    mime="text/csv"
-                )
+        st.success("✅ Vérification terminée")
 
-            except Exception as e:
-                st.error(f"Erreur : {e}")
+        df_resultats = pd.DataFrame(resultats)
+        st.dataframe(df_resultats, use_container_width=True)
 
-            finally:
-                if driver:
-                    driver.quit()
+        csv = df_resultats.to_csv(index=False)
 
-else:
-    st.info("👆 Chargez un fichier Excel pour commencer.")
+        st.download_button(
+            "📥 Télécharger CSV",
+            csv,
+            file_name=f"resultats_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+            mime="text/csv"
+        )
+
+    except Exception as e:
+        st.error(f"Erreur : {e}")
+
+    finally:
+        if driver:
+            driver.quit()
 
