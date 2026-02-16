@@ -9,102 +9,141 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.keys import Keys
 from datetime import datetime
 import time
-import random
 import os
-import streamlit.components.v1 as components
 
 # ==========================
 # CONFIG PAGE
 # ==========================
 st.set_page_config(
-    page_title="Vérification des statuts à l'inscription AFFECTÉ(E) - NON AFFECTÉ(E)",
+    page_title="Vérification des statuts",
     page_icon="🎓",
     layout="wide"
 )
 
 # ==========================
-# CHARGEMENT FICHIER (AVANT UTILISATION)
-# ==========================
-try:
-    if not os.path.exists("ABS_GENERAL.xlsx"):
-        st.error("❌ Le fichier ABS_GENERAL.xlsx est introuvable dans le repository.")
-        st.stop()
-
-    df = pd.read_excel("ABS_GENERAL.xlsx", engine="openpyxl")
-
-except Exception as e:
-    st.error(f"Erreur chargement fichier : {e}")
-    st.stop()
-
-if "MATRICULE" not in df.columns:
-    st.error("❌ Colonne 'MATRICULE' introuvable.")
-    st.stop()
-
-# ==========================
-# STYLE GLOBAL
+# STYLE GLOBAL PRO
 # ==========================
 st.markdown("""
 <style>
 
-html, body, [class*="css"]  {
-    background-color: #0b1c2d !important;
+html, body, [class*="css"] {
+    background:#071a2b;
     font-family: Arial, Helvetica, sans-serif;
-    color: white;
+    color:white;
 }
 
-h1 {
-    text-align: center;
-    font-weight: 900;
-    color: white;
+/* pleine largeur */
+.main .block-container{
+    max-width:100%;
+    padding-top:0.5rem;
+    padding-bottom:0rem;
 }
 
-.small-top {
-    font-size: 12px;
-    font-weight: 600;
-    text-align: center;
-    opacity: 0.8;
+/* TITRE */
+.main-title{
+    text-align:center;
+    font-size:38px;
+    font-weight:900;
+    letter-spacing:1px;
+    margin-bottom:5px;
 }
 
-.block-container {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+/* infos petites */
+.small-top{
+    text-align:center;
+    font-size:12px;
+    opacity:0.8;
+}
+
+/* zone centrale */
+.live-zone{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:78vh;
+}
+
+/* image large */
+[data-testid="stImage"] img{
+    border-radius:10px;
+}
+
+/* metrics */
+[data-testid="stMetricValue"]{
+    font-size:28px;
+    font-weight:800;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================
+# CHARGEMENT FICHIER
+# ==========================
+try:
+    if not os.path.exists("ABS_GENERAL.xlsx"):
+        st.error("❌ Fichier ABS_GENERAL.xlsx introuvable.")
+        st.stop()
+
+    df = pd.read_excel("ABS_GENERAL.xlsx", engine="openpyxl")
+
+except Exception as e:
+    st.error(f"Erreur chargement : {e}")
+    st.stop()
+
+if "MATRICULE" not in df.columns:
+    st.error("❌ Colonne MATRICULE absente.")
+    st.stop()
+
+# ==========================
 # HEADER
 # ==========================
+st.markdown("""
+<div class="main-title">
+🎓 SYSTÈME DE VÉRIFICATION DES STATUTS À L'INSCRIPTION<br>
+AFFECTÉ(E) - NON AFFECTÉ(E) 2025-2026
+</div>
+""", unsafe_allow_html=True)
+
 st.markdown(
-    "<h1>🎓 SYSTÈME DE VÉRIFICATION DES STATUTS À L'INSCRIPTION AFFECTÉ(E) - NON AFFECTÉ(E) 2025-2026</h1>",
+    f"<div class='small-top'>✅ {len(df)} lignes chargées automatiquement</div>",
     unsafe_allow_html=True
 )
 
-top_info = st.container()
+# ==========================
+# SELECTION INTERVALLE
+# ==========================
+colA, colB, colC = st.columns([1,1,1])
 
-with top_info:
-    col1, col2, col3 = st.columns([1,1,1])
-
-    with col2:
-        limite = st.number_input(
-            "Nombre de matricules à traiter",
-            min_value=1,
-            max_value=2000,
-            value=10
-        )
-
-    st.markdown(
-        f"<div class='small-top'>✅ {len(df)} lignes chargées automatiquement</div>",
-        unsafe_allow_html=True
+with colB:
+    start_row = st.number_input(
+        "Ligne début",
+        min_value=1,
+        max_value=len(df),
+        value=1
     )
+
+    end_row = st.number_input(
+        "Ligne fin",
+        min_value=1,
+        max_value=len(df),
+        value=min(50, len(df))
+    )
+
+if start_row > end_row:
+    st.error("Intervalle invalide.")
+    st.stop()
+
+subset = df.iloc[start_row-1:end_row]
+matricules = subset["MATRICULE"].astype(str).tolist()
 
 st.markdown("---")
 
 # ==========================
-# CONFIGURATION CHROME
+# CONFIG CHROME
 # ==========================
 def get_chrome_driver():
+
     chrome_options = Options()
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
@@ -116,19 +155,18 @@ def get_chrome_driver():
 
     driver = webdriver.Chrome(service=service, options=chrome_options)
     driver.set_page_load_timeout(30)
+
     return driver
 
 
 # ==========================
-# INTERFACE
+# BOUTON LANCEMENT
 # ==========================
-st.success(f"✅ {len(df)} lignes chargées automatiquement")
-
 if st.button("🚀 Lancer la vérification"):
 
-    matricules = df["MATRICULE"].astype(str).tolist()[:limite]
+    st.markdown('<div class="live-zone">', unsafe_allow_html=True)
 
-    col_page, col_progress = st.columns([2, 1])
+    col_page, col_progress = st.columns([3,1], gap="large")
 
     page_container = col_page.empty()
     progress_container = col_progress.container()
@@ -136,14 +174,14 @@ if st.button("🚀 Lancer la vérification"):
     progress_bar = progress_container.progress(0)
     status_text = progress_container.empty()
 
-    # Stats temps réel
     stat_affecte = progress_container.empty()
     stat_non_affecte = progress_container.empty()
     stat_introuvable = progress_container.empty()
     stat_erreur = progress_container.empty()
 
-    resultats = []
+    st.markdown('</div>', unsafe_allow_html=True)
 
+    resultats = []
     driver = None
 
     try:
@@ -162,6 +200,7 @@ if st.button("🚀 Lancer la vérification"):
             driver.get("https://agfne.sigfne.net/vas/interface-edition-documents-sigfne/")
 
             wait = WebDriverWait(driver, 15)
+
             champ = wait.until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='text']"))
             )
@@ -172,7 +211,7 @@ if st.button("🚀 Lancer la vérification"):
 
             time.sleep(2)
 
-            # 🔥 LIVE BROWSER EFFECT (Screenshot fluide)
+            # Screenshot LIVE
             png = driver.get_screenshot_as_png()
             page_container.image(png, use_container_width=True)
 
@@ -197,7 +236,7 @@ if st.button("🚀 Lancer la vérification"):
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             })
 
-            # 📊 Stats temps réel
+            # Stats LIVE
             stat_affecte.metric("✅ Affectés", count_affecte)
             stat_non_affecte.metric("❌ Non Affectés", count_non_affecte)
             stat_introuvable.metric("❓ Introuvables", count_introuvable)
@@ -205,7 +244,6 @@ if st.button("🚀 Lancer la vérification"):
 
             progress_bar.progress((i + 1) / len(matricules))
 
-            # 🧠 optimisation RAM (important Render free)
             driver.delete_all_cookies()
 
             if i < len(matricules) - 1:
@@ -222,6 +260,8 @@ if st.button("🚀 Lancer la vérification"):
     finally:
         if driver:
             driver.quit()
+
+
 
 
 
