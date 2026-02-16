@@ -11,12 +11,42 @@ from datetime import datetime
 import time
 import random
 import os
+import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Vérification des statuts à l'inscription AFFECTÉ(E) - NON AFFECTÉ(E)", page_icon="🎓", layout="wide")
-
-st.title("🎓 Système de Vérification des statuts à l'inscription AFFECTÉ(E) - NON AFFECTÉ(E) 2025-2026")
 # ==========================
-# 🎨 STYLE GLOBAL
+# CONFIG PAGE
+# ==========================
+st.set_page_config(
+    page_title="Vérification des statuts à l'inscription AFFECTÉ(E) - NON AFFECTÉ(E)",
+    page_icon="🎓",
+    layout="wide"
+)
+
+# ==========================
+# CHARGEMENT FICHIER (AVANT UTILISATION)
+# ==========================
+try:
+    if not os.path.exists("ABS_GENERAL.xlsx"):
+        st.error("❌ Le fichier ABS_GENERAL.xlsx est introuvable dans le repository.")
+        st.stop()
+
+    df = pd.read_excel("ABS_GENERAL.xlsx", engine="openpyxl")
+
+except Exception as e:
+    st.error(f"Erreur chargement fichier : {e}")
+    st.stop()
+
+if "MATRICULE" not in df.columns:
+    st.error("❌ Colonne 'MATRICULE' introuvable.")
+    st.stop()
+
+# ==========================
+# TITRE
+# ==========================
+st.title("🎓 Système de Vérification des statuts à l'inscription AFFECTÉ(E) - NON AFFECTÉ(E) 2025-2026")
+
+# ==========================
+# STYLE GLOBAL
 # ==========================
 st.markdown("""
 <style>
@@ -47,10 +77,10 @@ h1 {
 
 </style>
 """, unsafe_allow_html=True)
-# ==========================
-# HEADER HAUT COMPACT
-# ==========================
 
+# ==========================
+# HEADER
+# ==========================
 st.markdown(
     "<h1>🎓 SYSTÈME DE VÉRIFICATION DES STATUTS À L'INSCRIPTION AFFECTÉ(E) - NON AFFECTÉ(E) 2025-2026</h1>",
     unsafe_allow_html=True
@@ -95,87 +125,14 @@ def get_chrome_driver():
 
 
 # ==========================
-# FONCTION DE VERIFICATION
+# INTERFACE
 # ==========================
-def verifier_matricule(driver, matricule):
-
-    try:
-        driver.get("https://agfne.sigfne.net/vas/interface-edition-documents-sigfne/")
-        wait = WebDriverWait(driver, 15)
-
-        champ = wait.until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='text']"))
-        )
-
-        champ.clear()
-        champ.send_keys(str(matricule))
-        champ.send_keys(Keys.RETURN)
-
-        time.sleep(3)
-
-        page_text = driver.page_source.lower()
-
-        if "non affecte" in page_text:
-            statut = "NON_AFFECTE"
-        elif "affecte" in page_text:
-            statut = "AFFECTE"
-        elif "introuvable" in page_text or "non trouvé" in page_text:
-            statut = "INTROUVABLE"
-        else:
-            statut = "INDETERMINE"
-
-        return {
-            "statut": statut,
-            "matricule": matricule,
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
-
-    except Exception as e:
-        return {
-            "statut": "ERREUR",
-            "matricule": matricule,
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "erreur": str(e)[:100]
-        }
-
-
-# ==========================
-# INTERFACE STREAMLIT
-# ==========================
-
-# Sélecteur du nombre de lignes à traiter
-limite = st.number_input(
-    "Nombre de matricules à traiter",
-    min_value=1,
-    max_value=2000,
-    value=10
-)
-
-# Charger automatiquement le fichier du repository
-try:
-    if not os.path.exists("ABS_GENERAL.xlsx"):
-        st.error("❌ Le fichier ABS_GENERAL.xlsx est introuvable dans le repository.")
-        st.stop()
-
-    df = pd.read_excel("ABS_GENERAL.xlsx", engine="openpyxl")
-
-except Exception as e:
-    st.error(f"Erreur chargement fichier : {e}")
-    st.stop()
-
-
-# Vérifier colonne
-if "MATRICULE" not in df.columns:
-    st.error("❌ Colonne 'MATRICULE' introuvable.")
-    st.stop()
-
 st.success(f"✅ {len(df)} lignes chargées automatiquement")
 
 if st.button("🚀 Lancer la vérification"):
 
     matricules = df["MATRICULE"].astype(str).tolist()[:limite]
 
-    # Layout centré large
     col_center = st.container()
 
     with col_center:
@@ -218,12 +175,13 @@ if st.button("🚀 Lancer la vérification"):
 
             page_html = driver.page_source
 
-            # 🔥 LIVE VIEW CENTRE ÉCRAN
-            page_container.components.v1.html(
-                page_html,
-                height=700,
-                scrolling=True
-            )
+            # LIVE VIEW
+            with page_container:
+                components.html(
+                    page_html,
+                    height=700,
+                    scrolling=True
+                )
 
             page_text = page_html.lower()
 
@@ -247,7 +205,6 @@ if st.button("🚀 Lancer la vérification"):
 
             progress_bar.progress((i + 1) / len(matricules))
 
-            # 📊 STATS LIVE
             stats_box.markdown(f"""
             ### 📊 STATISTIQUES
             ✅ AFFECTÉ : {total_aff}  
@@ -266,4 +223,5 @@ if st.button("🚀 Lancer la vérification"):
     finally:
         if driver:
             driver.quit()
+
 
