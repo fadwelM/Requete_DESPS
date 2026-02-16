@@ -11,9 +11,9 @@ from datetime import datetime
 import time
 import random
 
-st.set_page_config(page_title="Vérification BEPC", page_icon="🎓", layout="wide")
+st.set_page_config(page_title="Vérification Inscription", page_icon="🎓", layout="wide")
 
-st.title("🎓 Système de Vérification BEPC")
+st.title("🎓 Système de Vérification Inscription")
 st.markdown("---")
 
 
@@ -101,27 +101,7 @@ def verifier_matricule(driver, matricule):
 # ==========================
 # INTERFACE STREAMLIT
 # ==========================
-
-col1, col2 = st.columns([2, 1])
-
-with col1:
-    uploaded_file = st.file_uploader(
-        "📂 Charger un fichier Excel (colonne MATRICULE)",
-        type=["xls", "xlsx"]
-    )
-
-with col2:
-    limite = st.number_input(
-        "Nombre à traiter",
-        min_value=1,
-        max_value=200,
-        value=10
-    )
-
-
-if uploaded_file:
-
-    df = pd.read_excel(uploaded_file)
+df = pd.read_excel("ABS_GENERAL.xlsx", engine="openpyxl")
 
     if "MATRICULE" not in df.columns:
         st.error("❌ Colonne 'MATRICULE' introuvable.")
@@ -180,3 +160,4 @@ if uploaded_file:
 
 else:
     st.info("👆 Chargez un fichier Excel pour commencer.")
+
