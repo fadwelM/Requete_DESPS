@@ -10,3 +10,4 @@ xlrd
 numpy
 tkinter
 matplotlib
+xlrd>=2.0.1
