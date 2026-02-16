@@ -164,7 +164,7 @@ def get_chrome_driver():
 # ==========================
 if st.button("🚀 Lancer la vérification"):
 
-    matricules = df["MATRICULE"].astype(str).tolist()[:limite]
+    matricules = df["MATRICULE"].astype(str).tolist()
 
     col_page, col_progress = st.columns([2, 1])
 
@@ -260,6 +260,7 @@ if st.button("🚀 Lancer la vérification"):
     finally:
         if driver:
             driver.quit()
+
 
 
 
