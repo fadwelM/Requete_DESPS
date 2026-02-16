@@ -1,4 +1,4 @@
- import streamlit as st
+import streamlit as st
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -119,26 +119,35 @@ if st.button("🚀 Lancer la vérification"):
 
     matricules = df["MATRICULE"].astype(str).tolist()[:limite]
 
-    # Layout 2/3 - 1/3
     col_page, col_progress = st.columns([2, 1])
 
-    # Screenshot live
-    png = driver.get_screenshot_as_png()
-    page_container.image(png, use_container_width=True)
+    page_container = col_page.empty()
     progress_container = col_progress.container()
 
+    progress_bar = progress_container.progress(0)
+    status_text = progress_container.empty()
+
+    # Stats temps réel
+    stat_affecte = progress_container.empty()
+    stat_non_affecte = progress_container.empty()
+    stat_introuvable = progress_container.empty()
+    stat_erreur = progress_container.empty()
+
     resultats = []
+
     driver = None
 
     try:
         driver = get_chrome_driver()
 
-        progress_bar = progress_container.progress(0)
-        status_text = progress_container.empty()
+        count_affecte = 0
+        count_non_affecte = 0
+        count_introuvable = 0
+        count_erreur = 0
 
         for i, m in enumerate(matricules):
 
-            status_text.markdown(f"### 🔄 Traitement {i+1}/{len(matricules)}")
+            status_text.markdown(f"### 🔄 {i+1}/{len(matricules)}")
             status_text.write(f"Matricule : **{m}**")
 
             driver.get("https://agfne.sigfne.net/vas/interface-edition-documents-sigfne/")
@@ -152,26 +161,26 @@ if st.button("🚀 Lancer la vérification"):
             champ.send_keys(str(m))
             champ.send_keys(Keys.RETURN)
 
-            time.sleep(3)
+            time.sleep(2)
 
-            # 🔥 Affichage LIVE de la page dans les 2/3 écran
-            page_html = driver.page_source
-            page_container.components.v1.html(
-                page_html,
-                height=800,
-                scrolling=True
-            )
+            # 🔥 LIVE BROWSER EFFECT (Screenshot fluide)
+            png = driver.get_screenshot_as_png()
+            page_container.image(png, use_container_width=True)
 
-            page_text = page_html.lower()
+            page_text = driver.page_source.lower()
 
             if "non affecte" in page_text:
                 statut = "NON_AFFECTE"
+                count_non_affecte += 1
             elif "affecte" in page_text:
                 statut = "AFFECTE"
+                count_affecte += 1
             elif "introuvable" in page_text:
                 statut = "INTROUVABLE"
+                count_introuvable += 1
             else:
-                statut = "INDETERMINE"
+                statut = "ERREUR"
+                count_erreur += 1
 
             resultats.append({
                 "matricule": m,
@@ -179,10 +188,19 @@ if st.button("🚀 Lancer la vérification"):
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             })
 
+            # 📊 Stats temps réel
+            stat_affecte.metric("✅ Affectés", count_affecte)
+            stat_non_affecte.metric("❌ Non Affectés", count_non_affecte)
+            stat_introuvable.metric("❓ Introuvables", count_introuvable)
+            stat_erreur.metric("🔥 Erreurs", count_erreur)
+
             progress_bar.progress((i + 1) / len(matricules))
 
+            # 🧠 optimisation RAM (important Render free)
+            driver.delete_all_cookies()
+
             if i < len(matricules) - 1:
-                time.sleep(random.uniform(2, 4))
+                time.sleep(1)
 
         progress_container.success("✅ Vérification terminée")
 
@@ -195,7 +213,3 @@ if st.button("🚀 Lancer la vérification"):
     finally:
         if driver:
             driver.quit()
-
-
-
-
