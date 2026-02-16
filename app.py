@@ -164,9 +164,9 @@ def get_chrome_driver():
 # ==========================
 if st.button("🚀 Lancer la vérification"):
 
-    st.markdown('<div class="live-zone">', unsafe_allow_html=True)
+    matricules = df["MATRICULE"].astype(str).tolist()[:limite]
 
-    col_page, col_progress = st.columns([3,1], gap="large")
+    col_page, col_progress = st.columns([2, 1])
 
     page_container = col_page.empty()
     progress_container = col_progress.container()
@@ -174,14 +174,14 @@ if st.button("🚀 Lancer la vérification"):
     progress_bar = progress_container.progress(0)
     status_text = progress_container.empty()
 
+    # Stats temps réel
     stat_affecte = progress_container.empty()
     stat_non_affecte = progress_container.empty()
     stat_introuvable = progress_container.empty()
     stat_erreur = progress_container.empty()
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
     resultats = []
+
     driver = None
 
     try:
@@ -200,7 +200,6 @@ if st.button("🚀 Lancer la vérification"):
             driver.get("https://agfne.sigfne.net/vas/interface-edition-documents-sigfne/")
 
             wait = WebDriverWait(driver, 15)
-
             champ = wait.until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='text']"))
             )
@@ -211,7 +210,7 @@ if st.button("🚀 Lancer la vérification"):
 
             time.sleep(2)
 
-            # Screenshot LIVE
+            # 🔥 LIVE BROWSER EFFECT (Screenshot fluide)
             png = driver.get_screenshot_as_png()
             page_container.image(png, use_container_width=True)
 
@@ -236,7 +235,7 @@ if st.button("🚀 Lancer la vérification"):
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             })
 
-            # Stats LIVE
+            # 📊 Stats temps réel
             stat_affecte.metric("✅ Affectés", count_affecte)
             stat_non_affecte.metric("❌ Non Affectés", count_non_affecte)
             stat_introuvable.metric("❓ Introuvables", count_introuvable)
@@ -244,6 +243,7 @@ if st.button("🚀 Lancer la vérification"):
 
             progress_bar.progress((i + 1) / len(matricules))
 
+            # 🧠 optimisation RAM (important Render free)
             driver.delete_all_cookies()
 
             if i < len(matricules) - 1:
@@ -260,6 +260,7 @@ if st.button("🚀 Lancer la vérification"):
     finally:
         if driver:
             driver.quit()
+
 
 
 
