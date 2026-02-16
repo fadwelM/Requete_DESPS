@@ -122,7 +122,9 @@ if st.button("🚀 Lancer la vérification"):
     # Layout 2/3 - 1/3
     col_page, col_progress = st.columns([2, 1])
 
-    page_container = col_page.empty()
+    # Screenshot live
+    png = driver.get_screenshot_as_png()
+    page_container.image(png, use_container_width=True)
     progress_container = col_progress.container()
 
     resultats = []
@@ -193,5 +195,6 @@ if st.button("🚀 Lancer la vérification"):
     finally:
         if driver:
             driver.quit()
+
 
 
