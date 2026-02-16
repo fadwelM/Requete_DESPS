@@ -37,22 +37,27 @@ st.markdown("""
         font-family: 'Segoe UI', Arial, sans-serif;
     }
     
-    /* Conteneur principal pleine largeur */
+    /* Conteneur principal pleine largeur - SANS PADDING EN HAUT */
     .main .block-container {
         max-width: 100%;
-        padding: 0.5rem 2rem 0rem 2rem;
+        padding: 0rem 2rem 0rem 2rem !important;
         background-color: #0B1A2F;
     }
     
-    /* Titre centré */
+    /* Supprimer tous les margin-top et padding-top inutiles */
+    .main > div {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+    
+    /* Titre centré - visible uniquement au début */
     .main-title {
         text-align: center;
         font-size: 42px;
         font-weight: 800;
         color: white;
-        top: 5;
         margin-top: 5px;
-        margin-bottom: 50px;
+        margin-bottom: 20px;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         letter-spacing: 1px;
         padding: 10px;
@@ -62,33 +67,36 @@ st.markdown("""
     /* Style des métriques */
     [data-testid="stMetric"] {
         background-color: #1E3A5F;
-        padding: 15px;
-        border-radius: 10px;
+        padding: 10px;
+        border-radius: 8px;
         border: 1px solid #2C4F7C;
-        margin: 5px 0;
+        margin: 2px 0;
     }
     
     [data-testid="stMetricLabel"] {
         color: #B0C4DE;
-        font-size: 14px;
+        font-size: 12px;
     }
     
     [data-testid="stMetricValue"] {
         color: white !important;
-        font-size: 28px !important;
+        font-size: 22px !important;
         font-weight: 700 !important;
     }
     
-    /* Style des inputs */
+    /* Style des inputs - PLUS COMPACTS */
     .stNumberInput input {
         background-color: #1E3A5F;
         color: white;
         border: 1px solid #2C4F7C;
         border-radius: 5px;
+        padding: 2px 5px !important;
+        height: 35px !important;
     }
     
     .stNumberInput label {
         color: #B0C4DE !important;
+        font-size: 14px !important;
     }
     
     /* Style du bouton */
@@ -97,10 +105,11 @@ st.markdown("""
         color: white;
         border: 2px solid #2C4F7C;
         border-radius: 8px;
-        padding: 10px 30px;
-        font-size: 18px;
+        padding: 5px 15px;
+        font-size: 16px;
         font-weight: 600;
         width: 100%;
+        height: 45px;
         transition: all 0.3s;
     }
     
@@ -109,28 +118,27 @@ st.markdown("""
         border-color: #3A6A9F;
     }
     
-    /* Zone des captures */
+    /* Zone des captures - PLEINE HAUTEUR */
     .screenshot-container {
         border: 2px solid #1E3A5F;
         border-radius: 10px;
         overflow: hidden;
-        margin: 10px 0;
-        top : 13px;
-        margin-top : 0 auto;
-        margin-bottom : 0 auto;
+        margin: 0;
         background-color: #0F1F35;
+        height: calc(100vh - 120px);  /* Hauteur adaptée à l'écran */
+        display: flex;
+        flex-direction: column;
     }
     
-    /* Style des progressions */
+    /* Style des progressions - PLEINE HAUTEUR */
     .progress-container {
         background-color: #0F1F35;
-        padding: 15px;
+        padding: 10px;
         border-radius: 10px;
         border: 1px solid #1E3A5F;
-        margin: 10px 0;
-        top : 13px;
-        margin-top : 0 auto;
-        margin-bottom : 0 auto;
+        margin: 0;
+        height: calc(100vh - 120px);  /* Hauteur adaptée à l'écran */
+        overflow-y: auto;  /* Scroll interne si nécessaire */
     }
     
     /* Barre de progression */
@@ -141,10 +149,10 @@ st.markdown("""
     /* Style des dataframes */
     .dataframe-container {
         background-color: #0F1F35;
-        padding: 20px;
+        padding: 15px;
         border-radius: 10px;
         border: 1px solid #1E3A5F;
-        margin-top: 20px;
+        margin-top: 10px;
     }
     
     /* Images en plein écran */
@@ -152,11 +160,13 @@ st.markdown("""
         width: 100%;
         margin: 0;
         padding: 0;
+        flex: 1;
     }
     
     [data-testid="stImage"] img {
         width: 100%;
-        height: auto;
+        height: 100%;
+        object-fit: contain;  /* Ajuste l'image sans déformation */
         border-radius: 8px;
         border: 2px solid #1E3A5F;
     }
@@ -169,10 +179,10 @@ st.markdown("""
         margin: 5px 0;
     }
     
-    /* Ligne de séparation */
+    /* Ligne de séparation - invisible */
     hr {
         border-color: #1E3A5F;
-        margin: 20px 0;
+        margin: 5px 0;
     }
     
     /* Messages de succès/erreur */
@@ -180,22 +190,59 @@ st.markdown("""
         background-color: #1E3A5F !important;
         color: white !important;
         border: 1px solid #2C4F7C !important;
+        font-size: 12px !important;
+        padding: 5px !important;
     }
     
-    /* Titre de colonnes pour l'intervalle */
+    /* Titre de colonnes pour l'intervalle - TRÈS COMPACT */
     .interval-title {
         color: #B0C4DE;
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 600;
-        margin-bottom: 25px;
-        margin-top: 10px;
-        top : 10px;
-            
+        margin-bottom: 2px;
+        margin-top: 0;
     }
     
-    /* Cache les petits éléments inutiles */
+    /* Cache les éléments inutiles */
     footer {display: none;}
     header {display: none;}
+    
+    /* Supprimer les espaces blancs en haut */
+    .stApp > header {
+        display: none !important;
+    }
+    
+    /* Ajustement des colonnes */
+    div[data-testid="column"] {
+        padding: 0 2px;
+    }
+    
+    /* Style du total */
+    .total-container {
+        background-color: #1E3A5F;
+        padding: 5px;
+        border-radius: 5px;
+        text-align: center;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Masquer le titre quand la recherche est lancée */
+    .hidden-title {
+        display: none !important;
+    }
+    
+    /* Zone de sélection compacte */
+    .selection-zone {
+        margin-bottom: 5px;
+    }
+    
+    /* Pour que tout tienne sur une seule page */
+    .main > div:first-child {
+        min-height: auto !important;
+    }
     
 </style>
 """, unsafe_allow_html=True)
@@ -234,26 +281,34 @@ if "MATRICULE" not in df.columns:
     st.stop()
 
 # ==========================
-# TITRE CENTRÉ
+# INITIALISATION SESSION STATE
 # ==========================
-st.markdown("""
-<div class="main-title">
-    🎓 VÉRIFICATION DES STATUTS D'INSCRIPTION<br>
-    <span style="font-size: 24px; color: #B0C4DE;">AFFECTÉ(E) / NON AFFECTÉ(E) 2025-2026</span>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown(f"<div class='info-text'>✅ {len(df)} matricules chargés depuis table la scolaire à traiter</div>", unsafe_allow_html=True)
+if 'verification_lancee' not in st.session_state:
+    st.session_state.verification_lancee = False
 
 # ==========================
-# SÉLECTION DE L'INTERVALLE
+# TITRE CENTRÉ (CACHÉ APRÈS LANCEMENT)
 # ==========================
-col1, col2, col3 = st.columns([1, 1, 1])
+if not st.session_state.verification_lancee:
+    st.markdown("""
+    <div class="main-title">
+        🎓 VÉRIFICATION DES STATUTS D'INSCRIPTION<br>
+        <span style="font-size: 24px; color: #B0C4DE;">AFFECTÉ(E) / NON AFFECTÉ(E) 2025-2026</span>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown(f"<div class='info-text'>✅ {len(df)} matricules chargés depuis la table scolaire à traiter</div>", unsafe_allow_html=True)
+
+# ==========================
+# SÉLECTION DE L'INTERVALLE (TOUJOURS EN HAUT)
+# ==========================
+st.markdown('<div class="selection-zone">', unsafe_allow_html=True)
+col1, col2, col3, col4 = st.columns([1, 1, 1, 1.5])
 
 with col1:
-    st.markdown('<div class="interval-title">📌 LIGNE DE DÉPART</div>', unsafe_allow_html=True)
+    st.markdown('<div class="interval-title">📌 DÉPART</div>', unsafe_allow_html=True)
     start_row = st.number_input(
-        " ",
+        "",
         min_value=1,
         max_value=len(df),
         value=1,
@@ -262,9 +317,9 @@ with col1:
     )
 
 with col2:
-    st.markdown('<div class="interval-title">🏁 LIGNE DE FIN</div>', unsafe_allow_html=True)
+    st.markdown('<div class="interval-title">🏁 FIN</div>', unsafe_allow_html=True)
     end_row = st.number_input(
-        "  ",
+        "",
         min_value=start_row,
         max_value=len(df),
         value=len(df),
@@ -273,24 +328,30 @@ with col2:
     )
 
 with col3:
-    st.markdown('<div class="interval-title">📊 TOTAL À TRAITER</div>', unsafe_allow_html=True)
+    st.markdown('<div class="interval-title">📊 TRAITER</div>', unsafe_allow_html=True)
     st.markdown(f"""
-    <div style="background-color: #1E3A5F; padding: 8px; border-radius: 5px; text-align: center;">
-        <span style="font-size: 24px; font-weight: 700;">{end_row - start_row + 1}</span>
-        <span style="color: #B0C4DE;"> / {len(df)}</span>
+    <div class="total-container">
+        <span style="font-size: 20px; font-weight: 700;">{end_row - start_row + 1}</span>
+        <span style="color: #B0C4DE; font-size: 14px;"> / {len(df)}</span>
     </div>
     """, unsafe_allow_html=True)
 
+with col4:
+    st.markdown('<div class="interval-title"> </div>', unsafe_allow_html=True)  # Espace pour aligner
+    bouton_lancement = st.button("🔍 RECHERCHER", use_container_width=True)
+
 if start_row > end_row:
-    st.error("❌ La ligne de fin doit être supérieure ou égale à la ligne de début.")
+    st.error("❌ La ligne de fin doit être ≥ à la ligne de début")
     st.stop()
 
+st.markdown('</div>', unsafe_allow_html=True)
 st.markdown("---")
 
 # ==========================
 # BOUTON LANCEMENT
 # ==========================
-if st.button("✅ LANCER LA RECHERCHE DES INFORMATION SUR LA FICHE D'INSCRIPTION", use_container_width=True):
+if bouton_lancement:
+    st.session_state.verification_lancee = True
     
     # Sélection des matricules selon l'intervalle choisi
     matricules = df.iloc[start_row-1:end_row]["MATRICULE"].astype(str).tolist()
@@ -299,35 +360,37 @@ if st.button("✅ LANCER LA RECHERCHE DES INFORMATION SUR LA FICHE D'INSCRIPTION
     col_captures, col_progress = st.columns([2, 1])
     
     with col_captures:
-        st.markdown('<div class="screenshot-container">', unsafe_allow_html=True)
-        screenshot_placeholder = st.empty()
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container():
+            st.markdown('<div class="screenshot-container">', unsafe_allow_html=True)
+            screenshot_placeholder = st.empty()
+            st.markdown('</div>', unsafe_allow_html=True)
     
     with col_progress:
-        st.markdown('<div class="progress-container">', unsafe_allow_html=True)
-        
-        # Barre de progression
-        st.markdown("### 📊 PROGRESSION")
-        progress_bar = st.progress(0)
-        status_text = st.empty()
-        
-        # Statistiques en temps réel
-        st.markdown("### 📈 STATISTIQUES")
-        col_stat1, col_stat2 = st.columns(2)
-        
-        with col_stat1:
-            stat_affecte = st.empty()
-            stat_introuvable = st.empty()
-        
-        with col_stat2:
-            stat_non_affecte = st.empty()
-            stat_erreur = st.empty()
-        
-        # Informations supplémentaires
-        st.markdown("### ℹ️ INFOS")
-        info_container = st.empty()
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container():
+            st.markdown('<div class="progress-container">', unsafe_allow_html=True)
+            
+            # Barre de progression
+            st.markdown("### 📊 PROGRESSION")
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            
+            # Statistiques en temps réel
+            st.markdown("### 📈 STATISTIQUES")
+            col_stat1, col_stat2 = st.columns(2)
+            
+            with col_stat1:
+                stat_affecte = st.empty()
+                stat_introuvable = st.empty()
+            
+            with col_stat2:
+                stat_non_affecte = st.empty()
+                stat_erreur = st.empty()
+            
+            # Informations supplémentaires
+            st.markdown("### ℹ️ INFOS")
+            info_container = st.empty()
+            
+            st.markdown('</div>', unsafe_allow_html=True)
     
     # Initialisation des compteurs
     count_affecte = 0
@@ -347,7 +410,7 @@ if st.button("✅ LANCER LA RECHERCHE DES INFORMATION SUR LA FICHE D'INSCRIPTION
         chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--disable-logging")
-        chrome_options.add_argument("--log-level=3")  # Réduit les logs
+        chrome_options.add_argument("--log-level=3")
         
         service = Service("/usr/local/bin/chromedriver")
         driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -357,10 +420,9 @@ if st.button("✅ LANCER LA RECHERCHE DES INFORMATION SUR LA FICHE D'INSCRIPTION
         for i, matricule in enumerate(matricules):
             # Mise à jour des infos
             status_text.markdown(f"""
-            ### 🔄 TRAITEMENT EN COURS
-            - **Matricule :** {matricule}
-            - **Ligne :** {start_row + i} / {end_row}
-            - **Progression :** {i+1}/{len(matricules)}
+            **Matricule :** {matricule}  
+            **Ligne :** {start_row + i}/{end_row}  
+            **Progression :** {i+1}/{len(matricules)}
             """)
             
             # Navigation
@@ -378,7 +440,7 @@ if st.button("✅ LANCER LA RECHERCHE DES INFORMATION SUR LA FICHE D'INSCRIPTION
             
             time.sleep(2)
             
-            # 🖥 Capture d'écran (2/3 de l'écran)
+            # 🖥 Capture d'écran
             png = driver.get_screenshot_as_png()
             screenshot_placeholder.image(png, use_container_width=True)
             
@@ -412,7 +474,7 @@ if st.button("✅ LANCER LA RECHERCHE DES INFORMATION SUR LA FICHE D'INSCRIPTION
             stat_erreur.metric("⚠️ ERREURS", count_erreur)
             
             # Info supplémentaire
-            info_container.info(f"💾 RAM utilisée : {i+1}/{len(matricules)} - Optimisation active")
+            info_container.info(f"💾 RAM: {i+1}/{len(matricules)}")
             
             # Barre de progression
             progress_bar.progress((i + 1) / len(matricules))
@@ -425,47 +487,42 @@ if st.button("✅ LANCER LA RECHERCHE DES INFORMATION SUR LA FICHE D'INSCRIPTION
         
         # FIN DU TRAITEMENT
         with col_progress:
-            st.success("✅ VÉRIFICATION TERMINÉE AVEC SUCCÈS")
+            st.success("✅ TERMINÉ")
             
             # Résumé final
             total = len(matricules)
             st.markdown(f"""
-            ### 📊 RÉSUMÉ FINAL
-            - ✅ Affectés : {count_affecte} ({count_affecte/total*100:.1f}%)
-            - 💻 Non affectés : {count_non_affecte} ({count_non_affecte/total*100:.1f}%)
-            - ❓ Introuvables : {count_introuvable} ({count_introuvable/total*100:.1f}%)
-            - ⚠️ Erreurs : {count_erreur} ({count_erreur/total*100:.1f}%)
+            **RÉSUMÉ**  
+            ✅ {count_affecte} ({count_affecte/total*100:.1f}%)  
+            💻 {count_non_affecte} ({count_non_affecte/total*100:.1f}%)  
+            ❓ {count_introuvable} ({count_introuvable/total*100:.1f}%)  
+            ⚠️ {count_erreur} ({count_erreur/total*100:.1f}%)
             """)
         
         # Affichage des résultats
         st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
-        st.markdown("### 📋 DÉTAIL DES RÉSULTATS")
+        st.markdown("### 📋 RÉSULTATS")
         df_resultats = pd.DataFrame(resultats)
         st.dataframe(df_resultats, use_container_width=True, hide_index=True)
         st.markdown('</div>', unsafe_allow_html=True)
         
     except Exception as e:
-        st.error(f"❌ Erreur pendant le traitement : {e}")
+        st.error(f"❌ Erreur : {e}")
     
     finally:
         if driver:
             driver.quit()
 
 else:
-    # Message d'instruction
-    st.markdown("""
-    <div style="text-align: center; padding: 50px; background-color: #0F1F35; border-radius: 10px; border: 1px solid #1E3A5F;">
-        <h2 style="color: white;">👆 CLIQUEZ SUR LE BOUTON POUR COMMENCER</h2>
-        <p style="color: #B0C4DE;">La vérification commencera à la ligne <strong>{}</strong> jusqu'à la ligne <strong>{}</strong></p>
-        <p style="color: #B0C4DE;">Soit <strong>{}</strong> matricule(s) à traiter sur <strong>{}</strong> au total</p>
-        <p style="color: #B0C4DE; font-size: 14px;">Les captures d'écran apparaîtront dans la partie gauche (2/3 de l'écran)<br>
-        Les statistiques et la progression seront affichées à droite (1/3 de l'écran)</p>
-    </div>
-    """.format(start_row, end_row, end_row - start_row + 1, len(df)), unsafe_allow_html=True)
-
-
-
-
+    if not st.session_state.verification_lancee:
+        # Message d'instruction
+        st.markdown("""
+        <div style="text-align: center; padding: 30px; background-color: #0F1F35; border-radius: 10px; border: 1px solid #1E3A5F;">
+            <h3 style="color: white;">👆 CLIQUEZ SUR RECHERCHER POUR COMMENCER</h3>
+            <p style="color: #B0C4DE;">Ligne {} à {} ({} matricules sur {})</p>
+            <p style="color: #B0C4DE; font-size: 13px;">Captures: 2/3 gauche | Stats: 1/3 droite</p>
+        </div>
+        """.format(start_row, end_row, end_row - start_row + 1, len(df)), unsafe_allow_html=True)
 
 
 
